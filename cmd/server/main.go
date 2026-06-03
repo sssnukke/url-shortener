@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/joho/godotenv"
+	"github.com/sssnukke/url-shortener/internal/repository"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +16,22 @@ func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("no .env file found")
 	}
+
+	ctx := context.Background()
+
+	pool, err := repository.NewPostgresPool(ctx)
+	if err != nil {
+		log.Fatalf("postgres: %v", err)
+	}
+	defer pool.Close()
+	log.Println("connected to postgres")
+
+	redis, err := repository.NewRedisPool(ctx)
+	if err != nil {
+		log.Fatalf("redis: %v", err)
+	}
+	defer redis.Close()
+	log.Println("connected to redis")
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
