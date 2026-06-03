@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
-	"log"
 	"os"
 )
 
 func NewPostgresPool(ctx context.Context) (*pgxpool.Pool, error) {
 	dsn := os.Getenv("POSTGRES_DSN")
-	log.Println("connecting with DSN:", dsn)
 
 	pool, err := pgxpool.New(ctx, dsn)
 	if err != nil {

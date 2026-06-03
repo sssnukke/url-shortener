@@ -24,8 +24,8 @@ type ShortenResponse struct {
 }
 
 type StaticResponse struct {
-	ShortCode   string `json:"short_code"`
-	OriginalURL string `json:"original_url"`
-	Clicks      int64  `json:"clicks"`
-	CreatedAt   int64  `json:"created_at"`
+	ShortCode   string    `json:"short_code"`
+	OriginalURL string    `json:"original_url"`
+	Clicks      int64     `json:"clicks"`
+	CreatedAt   time.Time `json:"created_at"`
 }

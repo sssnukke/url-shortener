@@ -23,7 +23,7 @@ func NewPostgresRepo(db *pgxpool.Pool) URLRepository {
 
 func (r *postgresRepo) Create(ctx context.Context, url *model.URL) error {
 	query := `
-		INSERT INTO url (short_code, original_url)
+		INSERT INTO urls (short_code, original_url)
 		VALUES ($1, $2)
 		RETURNING id, created_at
 	`
@@ -53,7 +53,7 @@ func (r *postgresRepo) IncrementClicks(ctx context.Context, shortCode string) er
 		UPDATE urls SET clicks = clicks + 1
 		WHERE short_code = $1
 	`
-	
+
 	_, err := r.db.Exec(ctx, query, shortCode)
 	return err
 }

@@ -3,7 +3,9 @@ package main
 import (
 	"context"
 	"github.com/joho/godotenv"
+	"github.com/sssnukke/url-shortener/internal/handler"
 	"github.com/sssnukke/url-shortener/internal/repository"
+	"github.com/sssnukke/url-shortener/internal/service"
 	"log"
 	"net/http"
 	"os"
@@ -19,6 +21,12 @@ func main() {
 
 	ctx := context.Background()
 
+	log.Println("running migrations...")
+	if err := repository.RunMigrations(os.Getenv("POSTGRES_DSN")); err != nil {
+		log.Fatalf("migrations: %v", err)
+	}
+	log.Println("migrations done")
+
 	pool, err := repository.NewPostgresPool(ctx)
 	if err != nil {
 		log.Fatalf("postgres: %v", err)
@@ -33,6 +41,13 @@ func main() {
 	defer redis.Close()
 	log.Println("connected to redis")
 
+	urlRepo := repository.NewPostgresRepo(pool)
+	cacheRepo := repository.NewRedisRepo(redis)
+
+	svc := service.NewShortenerService(urlRepo, cacheRepo)
+
+	router := handler.NewRouter(svc)
+
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		port = "8080"
@@ -40,6 +55,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         ":" + port,
+		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  60 * time.Second,
